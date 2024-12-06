@@ -17,6 +17,8 @@ exports.default = UserModel;
 const SessionSchema = new mongoose_1.default.Schema({
     title: { type: String, required: true },
     createdAt: { type: Date, default: Date.now },
+    sessionId: { type: String, required: true, unique: true },
+    userId: { type: mongoose_1.default.Types.ObjectId, ref: "User", required: true },
     status: { type: String, enum: ["active", "inactive"], default: "inactive" },
 });
 const SessionModel = mongoose_1.default.model("Session", SessionSchema);
