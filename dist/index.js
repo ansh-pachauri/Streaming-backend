@@ -52,7 +52,14 @@ const db_1 = __importStar(require("./db"));
 const config_1 = require("./config");
 const middleware_1 = require("./middleware");
 const random_1 = require("./random");
+// import {fromPath} from "pdf2pic";
+// import cloudinary from "./cloudinary";
+const sockets_1 = require("./sockets");
+sockets_1.wss.on("connection", () => {
+    console.log("New connection");
+});
 const app = (0, express_1.default)();
+// const upload = multer({dest:"uploads/"});
 app.use(express_1.default.json());
 //routes
 //signup route
@@ -228,6 +235,23 @@ app.post("/api/v1/session/:sessionId/slides", middleware_1.middleware, (req, res
         });
     }
 }));
+// const uploadPdf = upload.single("pdf");
+// const sessions = {};
+//adding the pdf route
+// app.post("/api/v1/session/:sessionId/slides/pdf",uploadPdf,middleware,async(req:Request,res:Response)=>{
+//   const {sessionId} = req.params;
+//   const session = await SessionModel.findOne({
+//     sessionId:sessionId,
+//     //@ts-ignore
+//     userId:req.userId
+//   })
+//   const pdfPath = req.file?.path; //path of the pdf file
+//   else{
+//     res.status(404).json({
+//       message:"Session not found"
+//     })
+//   }
+// })
 app.listen(3000, () => {
     console.log("Server is running on port 3000");
 });

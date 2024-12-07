@@ -6,12 +6,22 @@ import UserModel, { SessionModel } from "./db";
 import { jwtSecret } from "./config";
 import { middleware } from "./middleware";
 import { randomId } from "./random";
+import multer from "multer";
+// import {fromPath} from "pdf2pic";
+// import cloudinary from "./cloudinary";
+import {wss} from "./sockets";
 
+wss.on("connection",()=>{
+    console.log("New connection");
+})  
 
 
 
 
 const app = express();
+
+// const upload = multer({dest:"uploads/"});
+
 app.use(express.json());
 
 //routes
@@ -224,33 +234,27 @@ app.post("/api/v1/session/:sessionId/slides",middleware,async(req:Request,res:Re
 })
 
 
-//adding the pdf route
-app.post("/api/v1/session/:sessionId/slides/pdf",middleware,async(req:Request,res:Response)=>{
-  const {sessionId} = req.params;
-  const session = await SessionModel.findOne({
-    sessionId:sessionId,
-    //@ts-ignore
-    userId:req.userId
-  })
-  const imageUrl = req.body.imageUrl;
+// const uploadPdf = upload.single("pdf");
+// const sessions = {};
 
-  if(session){
-    res.status(200).json({
-      message:"Pdf added successfully",
-      slides :[{
-        type:"image",
-        payload :{
-          imageUrl : imageUrl
-        }
-      }]
-    })
-  }
-  else{
-    res.status(404).json({
-      message:"Session not found"
-    })
-  }
-})
+//adding the pdf route
+// app.post("/api/v1/session/:sessionId/slides/pdf",uploadPdf,middleware,async(req:Request,res:Response)=>{
+//   const {sessionId} = req.params;
+//   const session = await SessionModel.findOne({
+//     sessionId:sessionId,
+//     //@ts-ignore
+//     userId:req.userId
+//   })
+  
+//   const pdfPath = req.file?.path; //path of the pdf file
+
+  
+//   else{
+//     res.status(404).json({
+//       message:"Session not found"
+//     })
+//   }
+// })
 
 
 app.listen(3000, () => {
