@@ -52,10 +52,8 @@ const db_1 = __importStar(require("./db"));
 const config_1 = require("./config");
 const middleware_1 = require("./middleware");
 const random_1 = require("./random");
-// import {fromPath} from "pdf2pic";
-// import cloudinary from "./cloudinary";
-const sockets_1 = require("./sockets");
-sockets_1.wss.on("connection", () => {
+const chat_1 = require("./chat");
+chat_1.wss.on("connection", () => {
     console.log("New connection");
 });
 const app = (0, express_1.default)();
@@ -123,8 +121,9 @@ app.post("/api/v1/session", middleware_1.middleware, (req, res) => __awaiter(voi
         userId: req.userId,
     });
     if (session) {
-        res.status(200).json({ message: "Session created successfully",
-            "sessionId": sessionId });
+        res
+            .status(200)
+            .json({ message: "Session created successfully", sessionId: sessionId });
     }
     else {
         res.status(400).json({ message: "Invalid session data" });
@@ -135,10 +134,10 @@ app.get("/api/v1/session", middleware_1.middleware, (req, res) => __awaiter(void
     // Get all sessions for the current logged in user
     const sessions = yield db_1.SessionModel.find({
         //@ts-ignore
-        userId: req.userId
-    }).populate('userId'); // This will populate the user details
+        userId: req.userId,
+    }).populate("userId"); // This will populate the user details
     res.status(200).json({
-        sessions
+        sessions,
     });
 }));
 // If you want to get a specific session by sessionId:
@@ -147,14 +146,14 @@ app.get("/api/v1/session/:sessionId", middleware_1.middleware, (req, res) => __a
     const session = yield db_1.SessionModel.findOne({
         sessionId: sessionId,
         //@ts-ignore
-        userId: req.userId
-    }).populate('userId');
+        userId: req.userId,
+    }).populate("userId");
     if (!session) {
         res.status(404).json({ message: "Session not found" });
         return;
     }
     res.status(200).json({
-        session
+        session,
     });
 }));
 //start session route
@@ -163,24 +162,24 @@ app.post("/api/v1/session/:sessionId/start", middleware_1.middleware, (req, res)
     const session = yield db_1.SessionModel.findOne({
         sessionId: sessionId,
         //@ts-ignore
-        userId: req.userId
+        userId: req.userId,
     });
     if (!session) {
         res.status(404).json({
-            message: "Session not found"
+            message: "Session not found",
         });
         return;
     }
     if (session.status === "active") {
         res.status(400).json({
-            message: "Session already started"
+            message: "Session already started",
         });
         return;
     }
     // Update session status to active
     yield db_1.SessionModel.updateOne({ sessionId }, { $set: { status: "active" } });
     res.status(200).json({
-        message: "Session started successfully"
+        message: "Session started successfully",
     });
 }));
 //stop session route
@@ -189,24 +188,24 @@ app.post("/api/v1/session/:sessionId/end", middleware_1.middleware, (req, res) =
     const session = yield db_1.SessionModel.findOne({
         sessionId: sessionId,
         //@ts-ignore
-        userId: req.userId
+        userId: req.userId,
     });
     if (!session) {
         res.status(404).json({
-            message: "Session does not exist"
+            message: "Session does not exist",
         });
         return;
     }
     if (session.status === "inactive") {
         res.status(400).json({
-            message: "Session already ended"
+            message: "Session already ended",
         });
         return;
     }
     // Update session status to ended
     yield db_1.SessionModel.updateOne({ sessionId }, { $set: { status: "inactive" } });
     res.status(200).json({
-        message: "Session ended successfully"
+        message: "Session ended successfully",
     });
 }));
 //adding slides route
@@ -215,23 +214,25 @@ app.post("/api/v1/session/:sessionId/slides", middleware_1.middleware, (req, res
     const session = yield db_1.SessionModel.findOne({
         sessionId: sessionId,
         //@ts-ignore
-        userId: req.userId
+        userId: req.userId,
     });
     const imageUrl = req.body.imageUrl;
     if (session) {
         res.status(200).json({
             message: "Empty slides added successfully",
-            slides: [{
+            slides: [
+                {
                     type: "image",
                     payload: {
-                        imageUrl: imageUrl
-                    }
-                }]
+                        imageUrl: imageUrl,
+                    },
+                },
+            ],
         });
     }
     else {
         res.status(404).json({
-            message: "Session not found"
+            message: "Session not found",
         });
     }
 }));
@@ -252,6 +253,21 @@ app.post("/api/v1/session/:sessionId/slides", middleware_1.middleware, (req, res
 //     })
 //   }
 // })
-app.listen(3000, () => {
+app.post("/api/v1/chat", (req, res) => {
+    const message = req.body;
+    if (message) {
+        res.status(200).json({
+            success: true,
+            data: message
+        });
+    }
+    else {
+        res.status(400).json({
+            success: false,
+            data: "Please enter a valid message"
+        });
+    }
+});
+app.listen(3001, () => {
     console.log("Server is running on port 3000");
 });
